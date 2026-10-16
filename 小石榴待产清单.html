@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小石榴待产清单 · 预产期2027.3.22</title>
+<style>
+  :root{
+    --pink:#f8b4b4;
+    --pink-deep:#e88a8a;
+    --cream:#fff8f3;
+    --warm:#f5e6d3;
+    --text:#4a3b3b;
+    --text-light:#8a7575;
+    --green:#a8c9a0;
+    --blue:#a8c5d9;
+    --yellow:#f0d89a;
+    --card:#ffffff;
+    --shadow:0 2px 12px rgba(180,120,120,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--cream);
+    color:var(--text);
+    line-height:1.6;
+    padding-bottom:80px;
+  }
+  .container{max-width:820px;margin:0 auto;padding:20px}
+
+  /* 顶部概览 */
+  .hero{
+    background:linear-gradient(135deg,#ffd6d6,#ffe8d6);
+    border-radius:20px;padding:28px 24px;margin-bottom:20px;
+    box-shadow:var(--shadow);
+  }
+  .hero h1{font-size:22px;margin-bottom:4px;color:#6b4a4a}
+  .hero .sub{font-size:13px;color:var(--text-light);margin-bottom:18px}
+  .hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .hero-stat{
+    background:rgba(255,255,255,.7);border-radius:14px;padding:14px 10px;text-align:center;
+  }
+  .hero-stat .num{font-size:24px;font-weight:700;color:var(--pink-deep)}
+  .hero-stat .label{font-size:12px;color:var(--text-light);margin-top:2px}
+  .progress-wrap{margin-top:18px}
+  .progress-bar{
+    height:10px;background:rgba(255,255,255,.6);border-radius:5px;overflow:visible;
+    position:relative;
+    margin:18px 4px;
+  }
+  .progress-fill{
+    height:100%;background:linear-gradient(90deg,var(--pink),var(--pink-deep));
+    border-radius:5px;transition:width .4s;
+  }
+  .baby-crawl{
+    position:absolute;top:50%;left:0;
+    transform:translate(-50%,-50%);
+    transition:left .4s ease;
+    animation:crawl-bounce .6s ease-in-out infinite;
+    z-index:5;
+  }
+  .baby-crawl img{
+    height:46px;width:auto;display:block;
+    filter:drop-shadow(0 2px 3px rgba(200,120,120,.25));
+  }
+  @keyframes crawl-bounce{
+    0%,100%{margin-top:0}
+    50%{margin-top:-2px}
+  }
+  .progress-text{font-size:12px;color:var(--text-light);margin-top:6px;text-align:right}
+
+  /* 医院信息卡 */
+  .hospital{
+    background:var(--card);border-radius:18px;padding:18px 20px;margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .hospital h3{font-size:15px;color:#5a4040;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .hospital-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px}
+  .hospital-info .item{display:flex;gap:6px}
+  .hospital-info .k{color:var(--text-light);white-space:nowrap}
+  .hospital-info .v{color:var(--text)}
+  .insurance{
+    margin-top:10px;padding:10px 12px;background:#f0f7f0;border-radius:10px;
+    font-size:12px;color:#5a7a50;line-height:1.7;
+  }
+
+  /* 宠物猫管理卡 */
+  .cat-card{
+    background:linear-gradient(135deg,#f0f5ff,#f5f0ff);
+    border-radius:18px;padding:18px 20px;margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .cat-card h3{font-size:15px;color:#4a5a7a;margin-bottom:10px}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:13px;margin-bottom:10px}
+  .cat-grid .item{display:flex;gap:6px}
+  .cat-grid .k{color:#7a8aaa;white-space:nowrap}
+  .cat-warn{
+    background:#fff0f0;border-left:3px solid var(--pink-deep);
+    padding:8px 12px;border-radius:8px;font-size:12px;color:#a06060;line-height:1.7;
+  }
+
+  /* 阶段卡片 */
+  .phase{
+    background:var(--card);border-radius:18px;padding:20px;margin-bottom:16px;
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .phase-header{
+    display:flex;align-items:center;justify-content:space-between;
+    cursor:pointer;user-select:none;
+  }
+  .phase-title{display:flex;align-items:center;gap:10px}
+  .phase-dot{
+    width:12px;height:12px;border-radius:50%;flex-shrink:0;
+  }
+  .phase h2{font-size:17px;color:#5a4040}
+  .phase-meta{font-size:12px;color:var(--text-light);margin-top:2px}
+  .phase-badge{
+    font-size:12px;padding:3px 10px;border-radius:10px;
+    background:var(--warm);color:#8a6a4a;
+  }
+  .phase-badge.current{background:var(--pink);color:#fff}
+  .phase-badge.done{background:var(--green);color:#fff}
+  .phase-body{margin-top:16px;display:none}
+  .phase.open .phase-body{display:block}
+  .phase.open .arrow{transform:rotate(90deg)}
+  .arrow{transition:transform .2s;color:var(--text-light);font-size:14px}
+
+  /* 任务列表 */
+  .task-group{margin-bottom:14px}
+  .task-group-title{
+    font-size:13px;font-weight:600;color:var(--pink-deep);
+    margin-bottom:8px;padding-left:2px;
+  }
+  .task{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:8px 10px;border-radius:10px;cursor:pointer;
+    transition:background .15s;
+  }
+  .task:hover{background:var(--cream)}
+  .task input[type=checkbox]{
+    margin-top:4px;width:18px;height:18px;accent-color:var(--pink-deep);
+    cursor:pointer;flex-shrink:0;
+  }
+  .task-text{flex:1;font-size:14px}
+  .task.done .task-text{text-decoration:line-through;color:var(--text-light)}
+  .task-note{
+    display:block;font-size:12px;color:var(--text-light);margin-top:2px;
+  }
+  .tag{
+    display:inline-block;font-size:11px;padding:1px 7px;border-radius:8px;
+    margin-left:6px;vertical-align:middle;
+  }
+  .tag-check{background:#fff0f0;color:var(--pink-deep)}
+  .tag-buy{background:#f0f5ff;color:#6a8ab8}
+  .tag-warn{background:#fff8e0;color:#b89a4a}
+
+  /* 底部工具 */
+  .toolbar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:rgba(255,255,255,.95);backdrop-filter:blur(10px);
+    border-top:1px solid var(--warm);
+    padding:10px 20px;display:flex;gap:10px;justify-content:center;
+    z-index:100;
+  }
+  .toolbar button{
+    padding:8px 16px;border:none;border-radius:20px;font-size:13px;
+    background:var(--warm);color:var(--text);cursor:pointer;
+  }
+  .toolbar button.primary{background:var(--pink-deep);color:#fff}
+
+  /* 提示 */
+  .tip{
+    background:#fff8e0;border-left:3px solid var(--yellow);
+    padding:10px 14px;border-radius:8px;font-size:13px;
+    color:#8a7040;margin:10px 0;
+  }
+  @media(max-width:480px){
+    .hero-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+    .hero-stat .num{font-size:18px}
+    .container{padding:12px;padding-right:12px}
+  }
+
+  /* 右侧时间轴导航 */
+  .timeline-nav{
+    position:fixed;right:16px;top:50%;transform:translateY(-50%);
+    z-index:50;display:flex;flex-direction:column;gap:0;
+    background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
+    border-radius:20px;padding:12px 8px;box-shadow:var(--shadow);
+  }
+  .tl-node{
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    padding:4px 6px;border-radius:10px;transition:all .15s;
+    position:relative;
+  }
+  .tl-node:hover{background:var(--cream)}
+  .tl-dot{
+    width:10px;height:10px;border-radius:50%;background:var(--pink);
+    flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--pink);
+    transition:all .2s;
+  }
+  .tl-node.active .tl-dot{
+    background:var(--pink-deep);transform:scale(1.4);
+    box-shadow:0 0 0 3px rgba(232,138,138,.25);
+  }
+  .tl-label{
+    font-size:10px;color:var(--text-light);white-space:nowrap;
+    opacity:0;transform:translateX(-6px);transition:all .2s;
+    pointer-events:none;
+  }
+  .tl-node:hover .tl-label,
+  .tl-node.active .tl-label{opacity:1;transform:translateX(0)}
+  .tl-line{
+    width:2px;height:14px;background:var(--warm);margin-left:12px;
+  }
+  @media(max-width:900px){
+    .timeline-nav{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 顶部 -->
+  <div class="hero">
+    <h1>🌸 小石榴待产清单</h1>
+    <div class="sub">预产期 2027年3月22日 · 头胎 · 本文件保存在本地，断网可用</div>
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="num" id="stat-week">--</div>
+        <div class="label">当前孕周</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num" id="stat-countdown">--</div>
+        <div class="label">距预产期（天）</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num" id="stat-progress">0%</div>
+        <div class="label">清单完成度</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        <div class="baby-crawl" id="baby-crawl"><img src="小石榴_透明.png" alt="小石榴"></div>
+      </div>
+      <div class="progress-text" id="progress-detail">已完成 0 / 0 项</div>
+    </div>
+  </div>
+
+  <!-- 医院信息 -->
+  <div class="hospital">
+    <h3>🏥 生产医院 · 潍坊市中医院（高新/东院区）</h3>
+    <div class="hospital-info">
+      <div class="item"><span class="k">地址：</span><span class="v">高新区宝通东街11166号</span></div>
+      <div class="item"><span class="k">电话：</span><span class="v">0536-8590501 / 8885120</span></div>
+      <div class="item"><span class="k">等级：</span><span class="v">三甲公立中医医院</span></div>
+      <div class="item"><span class="k">产科：</span><span class="v">山东省重点学科</span></div>
+      <div class="item"><span class="k">无痛分娩：</span><span class="v">有（椎管内镇痛）</span></div>
+      <div class="item"><span class="k">陪产：</span><span class="v">家庭化陪伴分娩</span></div>
+    </div>
+    <div class="insurance">
+      <strong>医保报销参考（潍坊）：</strong><br>
+      · 职工医保：住院分娩政策范围内报销90%，产前检查定额800元<br>
+      · 居民医保（一孩）：住院分娩定额补贴1000元<br>
+      · 建议建档时确认医保备案流程，保留所有缴费单据<br>
+      <strong>月子方式：</strong>自家请月嫂（需提前3-6个月预定）
+    </div>
+  </div>
+
+  <!-- 猫咪管理 -->
+  <div class="cat-card">
+    <h3>🐱 家里猫咪 · 孕期&产后管理</h3>
+    <div class="cat-grid">
+      <div class="item"><span class="k">已做：</span><span>你自己处理猫砂盆</span></div>
+      <div class="item"><span class="k">原则：</span><span>猫不出门、喂猫粮/熟食</span></div>
+    </div>
+    <div class="cat-warn">
+      <strong>⚠️ 你自己清理猫砂时：</strong>必须戴一次性手套，事后用肥皂+流水认真洗手；猫砂<strong>每天铲</strong>（弓形虫卵囊需24-48小时才具感染性）；清理时不要揉眼睛、摸嘴。条件允许最好让家人代劳。
+    </div>
+    <div style="margin-top:10px;font-size:13px;line-height:2">
+      <strong>猫咪待办（点方框打勾）：</strong><br>
+      <label class="task" data-key="cat_0"><input type="checkbox" onchange="toggle('cat_0', this.checked)"><span class="task-text">带猫做弓形虫检测（IgM/IgG）</span></label>
+      <label class="task" data-key="cat_1"><input type="checkbox" onchange="toggle('cat_1', this.checked)"><span class="task-text">确认猫三联疫苗有效，过期补打</span></label>
+      <label class="task" data-key="cat_2"><input type="checkbox" onchange="toggle('cat_2', this.checked)"><span class="task-text">确认狂犬疫苗已接种</span></label>
+      <label class="task" data-key="cat_3"><input type="checkbox" onchange="toggle('cat_3', this.checked)"><span class="task-text">定期体内外驱虫（月外驱/3月内驱）</span></label>
+      <label class="task" data-key="cat_4"><input type="checkbox" onchange="toggle('cat_4', this.checked)"><span class="task-text">停喂生肉，改猫粮/熟食</span></label>
+      <label class="task" data-key="cat_5"><input type="checkbox" onchange="toggle('cat_5', this.checked)"><span class="task-text">产检加查TORCH（弓形虫IgM/IgG）</span></label>
+      <label class="task" data-key="cat_6"><input type="checkbox" onchange="toggle('cat_6', this.checked)"><span class="task-text">产后：宝宝房关门，猫不单独进</span></label>
+    </div>
+  </div>
+
+  <!-- 阶段卡片 动态渲染 -->
+  <div id="phases"></div>
+
+</div>
+
+<!-- 右侧时间轴导航 -->
+<div class="timeline-nav" id="timeline-nav">
+  <div class="tl-node" data-target="phase-early"><span class="tl-dot"></span><span class="tl-label">孕12周 建档</span></div>
+  <div class="tl-line"></div>
+  <div class="tl-node active" data-target="phase-mid1"><span class="tl-dot"></span><span class="tl-label">孕17+4 当前</span></div>
+  <div class="tl-line"></div>
+  <div class="tl-node" data-target="phase-mid2"><span class="tl-dot"></span><span class="tl-label">孕24周 大排畸</span></div>
+  <div class="tl-line"></div>
+  <div class="tl-node" data-target="phase-late1"><span class="tl-dot"></span><span class="tl-label">孕32周 小排畸</span></div>
+  <div class="tl-line"></div>
+  <div class="tl-node" data-target="phase-late2"><span class="tl-dot"></span><span class="tl-label">孕37周 足月</span></div>
+  <div class="tl-line"></div>
+  <div class="tl-node" data-target="phase-postpartum"><span class="tl-dot"></span><span class="tl-label">产后42天</span></div>
+</div>
+
+<!-- 底部工具栏 -->
+<div class="toolbar">
+  <button onclick="expandAll()">展开全部</button>
+  <button onclick="collapseAll()">收起全部</button>
+  <button onclick="exportData()">备份数据</button>
+  <button onclick="document.getElementById('import-file').click()">恢复备份</button>
+  <button onclick="resetData()" class="primary">重置</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<script>
+// ========== 配置 ==========
+const EDD = new Date('2027-03-22');
+const LMP = new Date('2026-06-15'); // 末次月经推算
+const STORAGE_KEY = 'xiaoshiliu_pregnancy_v1';
+
+// 阶段数据
+const phases = [
+  {
+    id: 'early',
+    name: '孕早期（1-12周）',
+    range: '2026.6.15 - 2026.9.7',
+    color: '#f8b4b4',
+    status: 'done',
+    groups: [
+      {
+        title: '已完成事项',
+        tasks: [
+          {text: '确认怀孕，末次月经记录', note: '2026.6.13'},
+          {text: '6-8周第一次B超：确认宫内孕、胎心胎芽'},
+          {text: '开始补充叶酸（0.4mg/天）', note: '建议持续到孕12周'},
+          {text: '11-13+6周 NT检查（颈项透明层）'},
+          {text: '孕12周建档', note: '带身份证、医保卡、之前检查单'},
+        ]
+      },
+      {
+        title: '孕早期注意事项',
+        tasks: [
+          {text: '避免烟酒、生食（生鱼片、半熟蛋）'},
+          {text: '避免浓精油、染发剂、新装修环境'},
+          {text: '如有出血/腹痛及时就医'},
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mid1',
+    name: '孕中期前段（13-20周）',
+    range: '2026.9.7 - 2026.11.2',
+    color: '#f5c9a0',
+    status: 'current',
+    groups: [
+      {
+        title: '产检安排',
+        tasks: [
+          {text: '15-20周 唐氏筛查（或无创DNA）', tag:'check', note: '35岁以下建议唐筛，高龄可直接无创'},
+          {text: '16-20周 常规产检：血压、体重、宫高、胎心'},
+          {text: '预约20-24周大排畸B超', tag:'warn', note: '热门医院需提前1个月约'},
+        ]
+      },
+      {
+        title: '生活与准备',
+        tasks: [
+          {text: '开始穿宽松衣物、换低跟鞋'},
+          {text: 'DHA/钙片可在医生指导下开始补充'},
+          {text: '开始浏览婴儿用品清单，不急着买'},
+          {text: '如有孕吐缓解，逐步均衡饮食'},
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mid2',
+    name: '孕中段关键期（20-28周）',
+    range: '2026.11.2 - 2026.12.28',
+    color: '#f0d89a',
+    status: 'upcoming',
+    groups: [
+      {
+        title: '产检安排',
+        tasks: [
+          {text: '20-24周 大排畸系统B超（三维/四维）', tag:'check', note: '看宝宝五官、器官、脊柱、胎盘位置'},
+          {text: '24-28周 糖耐量试验（OGTT）', tag:'check', note: '前一晚8点后禁食，空腹抽三次血'},
+          {text: '24周后每4周一次常规产检'},
+        ]
+      },
+      {
+        title: '开始采购',
+        tasks: [
+          {text: '买孕妇装、托腹裤', tag:'buy'},
+          {text: '确定婴儿床/床垫品牌并下单', tag:'buy', note: '提前散味，第一个月放次卧，奶奶陪睡'},
+          {text: '买奶瓶、消毒锅、温奶器', tag:'buy'},
+          {text: '买宝宝衣服（52/59码各2-3套）', tag:'buy'},
+          {text: '买纸尿裤NB号（先买1包试）', tag:'buy'},
+          {text: '孕24周后开始数胎动', tag:'warn'},
+          {text: '开始联系月嫂/月子机构，预约面试', tag:'warn', note: '金牌月嫂需提前3-6个月定，预产期3月是旺季'},
+        ]
+      }
+    ]
+  },
+  {
+    id: 'late1',
+    name: '孕晚期前段（28-36周）',
+    range: '2026.12.28 - 2027.2.22',
+    color: '#a8c9a0',
+    status: 'upcoming',
+    groups: [
+      {
+        title: '产检安排',
+        tasks: [
+          {text: '28-32周 小排畸B超', tag:'check'},
+          {text: '28周后每2周一次产检'},
+          {text: '30-32周 血常规、尿常规复查'},
+          {text: '35-37周 B族链球菌（GBS）筛查', tag:'check'},
+          {text: '36周后开始每周胎心监护（NST）', tag:'check'},
+        ]
+      },
+      {
+        title: '待产包准备',
+        tasks: [
+          {text: '妈妈入院用品：产褥垫、卫生巾、防溢乳垫、哺乳内衣、防滑拖鞋', tag:'buy'},
+          {text: '妈妈出院衣物、收腹带', tag:'buy'},
+          {text: '母乳喂养用品：电动吸奶器、储奶袋、羊脂乳头膏、防溢乳垫', tag:'buy', note: '生完头几天开奶可能堵奶，吸奶器早备'},
+          {text: '宝宝用品：和尚服、包被、胎帽、手套脚套、奶瓶、奶粉小罐', tag:'buy', note: '奶粉备一小罐以防头几天没奶'},
+          {text: '证件袋：身份证、医保卡、产检本、银行卡、结婚证', tag:'warn'},
+          {text: '手机充电器、充电宝', tag:'buy'},
+          {text: '把待产包集中放门口易拿处', tag:'warn'},
+        ]
+      },
+      {
+        title: '生活准备',
+        tasks: [
+          {text: '孕28周后停止长途旅行', tag:'warn'},
+          {text: '了解临产征兆：见红、破水、规律宫缩', tag:'warn'},
+          {text: '规划去医院的路线和备用方案（堵车/夜间）', note: '高新院区：宝通东街11166号'},
+          {text: '和家人沟通陪产安排、月子计划'},
+          {text: '孕妇瑜伽/散步保持活动'},
+          {text: '拍孕妇写真（最佳28-32周）', tag:'buy', note: '约今年12月底-明年1月初，提前1-2个月约摄影师；选秋冬保暖场景，带自己喜欢的裙子'},
+          {text: '确定月嫂并签约，明确服务内容、天数、费用', tag:'warn', note: '确认月嫂负责月子餐，写明是否含通乳/母婴护理/产后恢复；食材谁买、菜单谁定提前沟通'},
+          {text: '准备月子餐工具：电炖锅/养生壶、砂锅', tag:'buy', note: '月嫂负责做，家里厨具提前备齐'},
+          {text: '准备月嫂住的房间：加床/被褥/衣架', tag:'buy'},
+          {text: '家里提前做大扫除、除螨、通风', tag:'warn'},
+        ]
+      }
+    ]
+  },
+  {
+    id: 'late2',
+    name: '足月待产（36-40周）',
+    range: '2027.2.22 - 2027.3.22',
+    color: '#a8c5d9',
+    status: 'upcoming',
+    groups: [
+      {
+        title: '产检安排',
+        tasks: [
+          {text: '36周后每周产检 + 胎心监护', tag:'check'},
+          {text: '37周B超：评估胎位、羊水、胎盘成熟度、估重', tag:'check'},
+          {text: '和医生确认分娩方式（顺/剖）和入院指征'},
+        ]
+      },
+      {
+        title: '最后检查',
+        tasks: [
+          {text: '待产包最终清点，放车里或门口', tag:'warn'},
+          {text: '手机存好医院急诊电话、主治医生联系方式'},
+          {text: '安排好大宝（如有）/宠物/老人临时照看', tag:'warn'},
+          {text: '宝宝房间通风、床品洗净晒好', tag:'buy'},
+          {text: '布置次卧：婴儿床装好、奶奶被褥准备好、夜灯/温奶位置留好', tag:'warn', note: '第一个月石榴跟奶奶睡次卧，你多休息'},
+          {text: '保持手机电量充足，夜间不锁门'},
+        ]
+      },
+      {
+        title: '临产征兆识别',
+        tasks: [
+          {text: '见红：粉色/褐色分泌物，可洗头洗澡后入院'},
+          {text: '破水：无色液体流出，立即平躺垫高屁股，急诊', tag:'warn'},
+          {text: '规律宫缩：5-10分钟一次、每次30秒以上，去医院'},
+        ]
+      }
+    ]
+  },
+  {
+    id: 'postpartum',
+    name: '产后阶段（出生后-42天）',
+    range: '2027.3.20 起',
+    color: '#d9b8e8',
+    status: 'upcoming',
+    groups: [
+      {
+        title: '医院办理',
+        tasks: [
+          {text: '出生医学证明办理（宝宝姓名想好，父母身份证）', tag:'warn', note: '出院前或出院后1个月内办'},
+          {text: '出院结算：医保报销、生育保险申领材料留存'},
+        ]
+      },
+      {
+        title: '月子护理',
+        tasks: [
+          {text: '月嫂上户，观察母乳喂养、黄疸情况', tag:'warn'},
+          {text: '宝宝出生后24小时内接种乙肝疫苗第一针、卡介苗'},
+          {text: '宝宝出生后采足跟血（遗传代谢病筛查）'},
+          {text: '出院后3-7天社区医院上门访视', tag:'warn'},
+          {text: '产妇关注恶露、伤口、涨奶情况，发热及时就医'},
+        ]
+      },
+      {
+        title: '42天复查&后续',
+        tasks: [
+          {text: '产后42天妈妈复查：B超、伤口、盆底肌评估', tag:'check'},
+          {text: '宝宝42天体检：身长体重、听力复查、髋关节筛查', tag:'check'},
+          {text: '宝宝落户口（出生证明+户口本+父母身份证）'},
+          {text: '宝宝办理医保（出生90天内办理可追溯报销）', tag:'warn'},
+          {text: '满月/百日照安排（可选）'},
+        ]
+      }
+    ]
+  }
+];
+
+// ========== 渲染 ==========
+const container = document.getElementById('phases');
+
+function render(){
+  container.innerHTML = '';
+  phases.forEach((p, idx) => {
+    const el = document.createElement('div');
+    el.className = 'phase' + (p.status==='current' ? ' open' : '');
+    el.id = 'phase-' + p.id;
+    let badge = '';
+    if(p.status==='done') badge = '<span class="phase-badge done">已完成</span>';
+    else if(p.status==='current') badge = '<span class="phase-badge current">进行中</span>';
+    else badge = '<span class="phase-badge">待开始</span>';
+
+    let groupsHtml = '';
+    p.groups.forEach((g, gi) => {
+      let tasksHtml = '';
+      g.tasks.forEach((t, ti) => {
+        const key = `${p.id}_${gi}_${ti}`;
+        const checked = state[key] ? 'checked' : '';
+        const doneCls = state[key] ? 'done' : '';
+        let tagHtml = '';
+        if(t.tag==='check') tagHtml = '<span class="tag tag-check">产检</span>';
+        if(t.tag==='buy') tagHtml = '<span class="tag tag-buy">采购</span>';
+        if(t.tag==='warn') tagHtml = '<span class="tag tag-warn">重点</span>';
+        const noteHtml = t.note ? `<span class="task-note">${t.note}</span>` : '';
+        tasksHtml += `
+          <label class="task ${doneCls}" data-key="${key}">
+            <input type="checkbox" ${checked} onchange="toggle('${key}', this.checked)">
+            <span class="task-text">${t.text}${tagHtml}${noteHtml}</span>
+          </label>`;
+      });
+      groupsHtml += `<div class="task-group">
+        <div class="task-group-title">${g.title}</div>
+        ${tasksHtml}
+      </div>`;
+    });
+
+    el.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${p.id}')">
+        <div class="phase-title">
+          <span class="phase-dot" style="background:${p.color}"></span>
+          <div>
+            <h2>${p.name}</h2>
+            <div class="phase-meta">${p.range}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${badge}
+          <span class="arrow">▶</span>
+        </div>
+      </div>
+      <div class="phase-body">${groupsHtml}</div>
+    `;
+    container.appendChild(el);
+  });
+  updateProgress();
+  initCatChecks();
+}
+
+function togglePhase(id){
+  document.getElementById('phase-'+id).classList.toggle('open');
+}
+function expandAll(){ document.querySelectorAll('.phase').forEach(e=>e.classList.add('open')); }
+function collapseAll(){ document.querySelectorAll('.phase').forEach(e=>e.classList.remove('open')); }
+
+// ========== 状态管理 ==========
+let state = {};
+try{
+  state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+}catch(e){ state = {}; }
+
+function toggle(key, checked){
+  if(checked) state[key] = true;
+  else delete state[key];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const label = document.querySelector(`[data-key="${key}"]`);
+  if(label) label.classList.toggle('done', checked);
+  updateProgress();
+}
+
+function updateProgress(){
+  let total = 0, done = 0;
+  phases.forEach(p => p.groups.forEach(g => g.tasks.forEach((t,i) => {
+    total++;
+    const key = `${p.id}_${p.groups.indexOf(g)}_${i}`;
+    if(state[key]) done++;
+  })));
+  // 猫咪7项
+  for(let i=0;i<7;i++){ total++; if(state['cat_'+i]) done++; }
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('stat-progress').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-detail').textContent = `已完成 ${done} / ${total} 项`;
+  // 小宝宝跟着进度走
+  const baby = document.getElementById('baby-crawl');
+  if(baby){
+    const clamped = Math.min(Math.max(pct, 2), 98);
+    baby.style.left = clamped + '%';
+  }
+}
+
+// 初始化猫咪checkbox状态
+function initCatChecks(){
+  for(let i=0;i<7;i++){
+    const key = 'cat_'+i;
+    const input = document.querySelector(`[data-key="${key}"] input`);
+    const label = document.querySelector(`[data-key="${key}"]`);
+    if(input && state[key]) input.checked = true;
+    if(label && state[key]) label.classList.add('done');
+  }
+}
+
+// ========== 孕周计算 ==========
+function updateStats(){
+  const now = new Date();
+  const diffDays = Math.floor((now - LMP) / 86400000);
+  const weeks = Math.floor(diffDays / 7);
+  const days = diffDays % 7;
+  document.getElementById('stat-week').textContent = `${weeks}周+${days}天`;
+  const toEDD = Math.ceil((EDD - now) / 86400000);
+  document.getElementById('stat-countdown').textContent = toEDD;
+}
+
+// ========== 备份/恢复 ==========
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '小石榴待产清单备份_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      state = JSON.parse(ev.target.result);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      alert('备份已恢复');
+    }catch(err){ alert('文件格式错误'); }
+  };
+  reader.readAsText(file);
+}
+function resetData(){
+  if(confirm('确定要清空所有勾选记录吗？此操作不可恢复。')){
+    state = {};
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+  }
+}
+
+// 启动
+updateStats();
+render();
+
+// 时间轴点击跳转
+document.querySelectorAll('.tl-node').forEach(node => {
+  node.addEventListener('click', () => {
+    const targetId = node.dataset.target;
+    const el = document.getElementById(targetId);
+    if(el){
+      // 先展开目标阶段
+      el.classList.add('open');
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+});
+
+// 滚动时自动高亮当前阶段
+window.addEventListener('scroll', () => {
+  const nodes = document.querySelectorAll('.tl-node');
+  let current = null;
+  nodes.forEach(n => {
+    const el = document.getElementById(n.dataset.target);
+    if(!el) return;
+    const rect = el.getBoundingClientRect();
+    if(rect.top < window.innerHeight * 0.4) current = n;
+  });
+  nodes.forEach(n => n.classList.remove('active'));
+  if(current) current.classList.add('active');
+});
+</script>
+</body>
+</html>
