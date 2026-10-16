@@ -215,9 +215,47 @@
   @media(max-width:900px){
     .timeline-nav{display:none}
   }
+
+  /* 密码解锁弹窗 */
+  .lock-overlay{
+    position:fixed;inset:0;background:rgba(255,248,243,.97);
+    z-index:999;display:flex;align-items:center;justify-content:center;
+  }
+  .lock-box{
+    background:#fff;border-radius:20px;padding:32px 28px;
+    box-shadow:var(--shadow);text-align:center;max-width:340px;width:90%;
+  }
+  .lock-box h2{font-size:18px;color:#5a4040;margin-bottom:6px}
+  .lock-box p{font-size:13px;color:var(--text-light);margin-bottom:18px}
+  .lock-box input{
+    width:100%;padding:12px 14px;border:2px solid var(--warm);
+    border-radius:12px;font-size:15px;text-align:center;outline:none;
+    margin-bottom:12px;
+  }
+  .lock-box input:focus{border-color:var(--pink)}
+  .lock-box button{
+    width:100%;padding:12px;border:none;border-radius:12px;
+    background:var(--pink-deep);color:#fff;font-size:15px;cursor:pointer;
+  }
+  .lock-error{color:#d06060;font-size:12px;margin-top:8px;display:none}
+  .lock-status{font-size:11px;color:var(--text-light);margin-top:12px}
+  .view-only{opacity:.7;pointer-events:none}
 </style>
 </head>
 <body>
+
+<!-- 密码解锁弹窗 -->
+<div class="lock-overlay" id="lock-overlay">
+  <div class="lock-box">
+    <h2>🌸 小石榴待产清单</h2>
+    <p>输入密码后可编辑和同步进度</p>
+    <input type="password" id="password-input" placeholder="请输入密码" onkeydown="if(event.key==='Enter')unlock()">
+    <button onclick="unlock()">解锁</button>
+    <div class="lock-error" id="lock-error">密码错误，请重试</div>
+    <div class="lock-status" id="lock-status">只读模式 · 可查看不可编辑</div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- 顶部 -->
@@ -602,9 +640,10 @@ try{
 }catch(e){ state = {}; }
 
 function toggle(key, checked){
+  if(!unlocked) return;
   if(checked) state[key] = true;
   else delete state[key];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  autoSave();
   const label = document.querySelector(`[data-key="${key}"]`);
   if(label) label.classList.toggle('done', checked);
   updateProgress();
@@ -683,9 +722,92 @@ function resetData(){
   }
 }
 
+// ====== 云同步配置 ======
+const API_URL = ''; // 部署Worker后填这里，例如 https://xiaoshiliu.your-workername.workers.dev
+const SAVE_DELAY = 800; // 勾选后延迟保存（毫秒），避免频繁请求
+
+let unlocked = false;
+let saveTimer = null;
+
+// 密码验证
+function unlock(){
+  const pwd = document.getElementById('password-input').value;
+  if(!API_URL){
+    // 未配置云同步，本地模式直接解锁
+    unlocked = true;
+    document.getElementById('lock-overlay').style.display = 'none';
+    document.body.classList.remove('view-only');
+    return;
+  }
+  // 验证密码
+  fetch(API_URL + '/state', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-Auth-Password': pwd},
+    body: '{}'
+  }).then(r => {
+    if(r.ok){
+      unlocked = true;
+      sessionStorage.setItem('shiliu_pwd', pwd);
+      document.getElementById('lock-overlay').style.display = 'none';
+      document.body.classList.remove('view-only');
+      loadFromCloud();
+    } else {
+      document.getElementById('lock-error').style.display = 'block';
+    }
+  }).catch(() => {
+    // 网络错误，降级本地模式
+    unlocked = true;
+    document.getElementById('lock-overlay').style.display = 'none';
+    document.body.classList.remove('view-only');
+  });
+}
+
+// 从云端加载状态
+function loadFromCloud(){
+  if(!API_URL) return;
+  fetch(API_URL + '/state')
+    .then(r => r.json())
+    .then(data => {
+      if(data && Object.keys(data).length > 0){
+        state = data;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+      }
+    })
+    .catch(() => {});
+}
+
+// 保存到云端
+function saveToCloud(){
+  if(!API_URL || !unlocked) return;
+  const pwd = sessionStorage.getItem('shiliu_pwd') || '';
+  fetch(API_URL + '/state', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-Auth-Password': pwd},
+    body: JSON.stringify(state)
+  }).catch(() => {});
+}
+
+// 自动保存
+function autoSave(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToCloud, SAVE_DELAY);
+}
+
 // 启动
 updateStats();
 render();
+
+// 检查是否已解锁（session内记住）
+if(sessionStorage.getItem('shiliu_pwd')){
+  unlocked = true;
+  document.getElementById('lock-overlay').style.display = 'none';
+  document.body.classList.remove('view-only');
+  loadFromCloud();
+} else {
+  document.body.classList.add('view-only');
+}
 
 // 时间轴点击跳转
 document.querySelectorAll('.tl-node').forEach(node => {
