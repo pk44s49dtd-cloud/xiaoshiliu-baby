@@ -724,9 +724,8 @@ function resetData(){
   }
 }
 
-// ====== 云同步配置 ======
-const API_URL = 'https://helloxiaoshiliu.pk44s49dtd.workers.dev';
-const SAVE_DELAY = 800; // 勾选后延迟保存（毫秒），避免频繁请求
+// ====== 本地模式（无云同步，用导出/导入手动同步）======
+const SAVE_DELAY = 500;
 
 let unlocked = false;
 let saveTimer = null;
@@ -734,67 +733,19 @@ let saveTimer = null;
 // 密码验证
 function unlock(){
   const pwd = document.getElementById('password-input').value;
-  if(!API_URL){
-    // 未配置云同步，本地模式直接解锁
-    unlocked = true;
-    document.getElementById('lock-overlay').style.display = 'none';
-    document.body.classList.remove('view-only');
+  if(pwd !== 'shiliu2027'){
+    document.getElementById('lock-error').style.display = 'block';
     return;
   }
-  // 验证密码
-  fetch(API_URL + '/state', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','X-Auth-Password': pwd},
-    body: '{}'
-  }).then(r => {
-    if(r.ok){
-      unlocked = true;
-      sessionStorage.setItem('shiliu_pwd', pwd);
-      document.getElementById('lock-overlay').style.display = 'none';
-      document.body.classList.remove('view-only');
-      loadFromCloud();
-    } else {
-      document.getElementById('lock-error').style.display = 'block';
-    }
-  }).catch(() => {
-    // 网络错误，降级本地模式
-    unlocked = true;
-    document.getElementById('lock-overlay').style.display = 'none';
-    document.body.classList.remove('view-only');
-  });
+  unlocked = true;
+  sessionStorage.setItem('shiliu_pwd', pwd);
+  document.getElementById('lock-overlay').style.display = 'none';
+  document.body.classList.remove('view-only');
 }
 
-// 从云端加载状态
-function loadFromCloud(){
-  if(!API_URL) return;
-  fetch(API_URL + '/state')
-    .then(r => r.json())
-    .then(data => {
-      if(data && Object.keys(data).length > 0){
-        state = data;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        render();
-      }
-    })
-    .catch(() => {});
-}
-
-// 保存到云端
-function saveToCloud(){
-  if(!API_URL || !unlocked) return;
-  const pwd = sessionStorage.getItem('shiliu_pwd') || '';
-  fetch(API_URL + '/state', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','X-Auth-Password': pwd},
-    body: JSON.stringify(state)
-  }).catch(() => {});
-}
-
-// 自动保存
+// 自动保存到本地
 function autoSave(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  if(saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveToCloud, SAVE_DELAY);
 }
 
 // 启动
@@ -806,7 +757,6 @@ if(sessionStorage.getItem('shiliu_pwd')){
   unlocked = true;
   document.getElementById('lock-overlay').style.display = 'none';
   document.body.classList.remove('view-only');
-  loadFromCloud();
 } else {
   document.body.classList.add('view-only');
 }
